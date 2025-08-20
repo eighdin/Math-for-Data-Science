@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slope and Intercept Visualizer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+    .container { max-width: 500px; margin: auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+    label { display: block; margin-top: 16px; }
+    input[type="number"] { width: 100px; margin-left: 8px; }
+    canvas { display: block; margin: 32px auto 0 auto; background: #fff; border: 1px solid #ccc; }
+    button { margin-top: 20px; padding: 8px 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Slope & Intercept Visualizer</h2>
+    <form id="lineForm">
+      <label>Slope (m): <input type="number" id="slope" value="1" step="any"></label>
+      <label>Intercept (b): <input type="number" id="intercept" value="0" step="any"></label>
+      <button type="submit">Draw Line</button>
+    </form>
+    <canvas id="lineCanvas" width="400" height="400"></canvas>
+  </div>
+  <script>
+    const form = document.getElementById('lineForm');
+    const slopeInput = document.getElementById('slope');
+    const interceptInput = document.getElementById('intercept');
+    const canvas = document.getElementById('lineCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawLine(m, b) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw axes
+      ctx.strokeStyle = '#aaa';
+      ctx.beginPath();
+      ctx.moveTo(0, 200); ctx.lineTo(400, 200); // x-axis
+      ctx.moveTo(200, 0); ctx.lineTo(200, 400); // y-axis
+      ctx.stroke();
+      // Draw line y = mx + b
+      ctx.strokeStyle = '#0074D9';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      // Map x from -10 to 10
+      let x1 = -10, x2 = 10;
+      let y1 = m * x1 + b;
+      let y2 = m * x2 + b;
+      // Convert to canvas coords
+      let cx1 = 200 + x1 * 20;
+      let cy1 = 200 - y1 * 20;
+      let cx2 = 200 + x2 * 20;
+      let cy2 = 200 - y2 * 20;
+      ctx.moveTo(cx1, cy1);
+      ctx.lineTo(cx2, cy2);
+      ctx.stroke();
+      // Draw equation
+      ctx.fillStyle = '#333';
+      ctx.font = '16px Arial';
+      ctx.fillText(`y = ${m}x + ${b}`, 20, 30);
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const m = parseFloat(slopeInput.value);
+      const b = parseFloat(interceptInput.value);
+      drawLine(m, b);
+    });
+
+    // Initial draw
+    drawLine(1, 0);
+  </script>
+</body>
+</html>
