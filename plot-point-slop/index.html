@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Point Guessing Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+    .container { max-width: 480px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px #0001; position: relative; }
+  .counter { position: absolute; top: 16px; right: 24px; font-size: 18px; color: #0074D9; font-weight: bold; }
+  .target-coords { text-align: center; font-size: 18px; color: #ff4136; margin-bottom: 8px; margin-top: 8px; }
+  h2 { margin-top: 0; text-align: center; }
+    canvas { display: block; margin: 32px auto 0 auto; background: #fff; border: 1px solid #ccc; transition: box-shadow 0.2s; }
+    button { margin: 24px auto 0 auto; display: block; padding: 10px 24px; font-size: 16px; border-radius: 6px; border: none; background: #0074D9; color: #fff; cursor: pointer; }
+    button:active { background: #005fa3; }
+    .checkmark {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -60%);
+      font-size: 80px;
+      color: #2ecc40;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .show-check { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+  <div class="counter" id="counter">0</div>
+  <div class="target-coords" id="targetCoords"></div>
+  <h2>Guess the Target Point!</h2>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <div class="checkmark" id="checkmark">✔️</div>
+  <button id="checkBtn">Check</button>
+  <button id="resetGuessBtn" style="margin-top:12px;">Reset Position</button>
+  <div class="target-coords" id="guessCoords" style="color: black;"></div>
+  </div>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const checkBtn = document.getElementById('checkBtn');
+    const counterDiv = document.getElementById('counter');
+    const checkmarkDiv = document.getElementById('checkmark');
+  let target = {x: 0, y: 0};
+  let guess = {x: 0, y: 0};
+  let dragging = false;
+  let streak = 0;
+  const RADIUS = 8;
+  const TOLERANCE = 12; // px (restored to original)
+  const targetCoordsDiv = document.getElementById('targetCoords');
+  const resetGuessBtn = document.getElementById('resetGuessBtn');
+  const guessCoordsDiv = document.getElementById('guessCoords');
+
+    function randomCoord() {
+      // Map -20 to 20 to canvas coordinates (0 to 400)
+      // x = -20 -> 0, x = 0 -> 200, x = 20 -> 400
+      return Math.floor(Math.random() * 41) - 20;
+    }
+    function coordToCanvas(val) {
+      // -20 to 20 mapped to 0 to 400
+      return 200 + val * 10;
+    }
+    function coordToCanvasY(val) {
+      // Invert Y: -20 (top) -> 400, 0 -> 200, 20 (bottom) -> 0
+      return 200 - val * 10;
+    }
+    function canvasToCoord(val) {
+      // 0 to 400 mapped to -20 to 20
+      return Math.round((val - 200) / 10);
+    }
+    function canvasToCoordY(val) {
+      // 0 to 400 mapped to 20 to -20 (invert)
+      return Math.round((200 - val) / 10);
+    }
+
+    function updateGuessCoords() {
+      guessCoordsDiv.textContent = `Your Guess: (${guess.x}, ${guess.y})`;
+    }
+
+    function resetGame(newStreak = streak) {
+      target = { x: randomCoord(), y: randomCoord() };
+      guess = { x: 0, y: 0 };
+      streak = newStreak;
+      counterDiv.textContent = streak;
+      checkmarkDiv.classList.remove('show-check');
+      targetCoordsDiv.textContent = `Target: (${target.x}, ${target.y})`;
+      updateGuessCoords();
+      draw();
+    }
+
+    resetGuessBtn.addEventListener('click', () => {
+      guess = { x: 0, y: 0 };
+      updateGuessCoords();
+      draw();
+    });
+
+    function draw(flashColor = null) {
+      ctx.clearRect(0, 0, 400, 400);
+      // Flash effect
+      if (flashColor) {
+        ctx.save();
+        ctx.fillStyle = flashColor;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(0, 0, 400, 400);
+        ctx.restore();
+      }
+      // Draw axes
+      ctx.strokeStyle = '#eee';
+      ctx.beginPath();
+      ctx.moveTo(0, 200); ctx.lineTo(400, 200);
+      ctx.moveTo(200, 0); ctx.lineTo(200, 400);
+      ctx.stroke();
+      // Draw guess point
+      ctx.beginPath();
+      ctx.arc(coordToCanvas(guess.x), coordToCanvasY(guess.y), RADIUS, 0, 2 * Math.PI);
+      ctx.fillStyle = '#0074D9';
+      ctx.fill();
+      ctx.font = '14px Arial';
+      ctx.fillStyle = '#000';
+      ctx.fillText('Your Guess', coordToCanvas(guess.x) + 10, coordToCanvasY(guess.y) - 10);
+    }
+
+    function isOnGuessPoint(mx, my) {
+      return Math.hypot(mx - guess.x, my - guess.y) < RADIUS + 4;
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      // Convert to logical coords
+      const gx = coordToCanvas(guess.x);
+      const gy = coordToCanvasY(guess.y);
+      if (Math.hypot(mx - gx, my - gy) < RADIUS + 4) dragging = true;
+    });
+    canvas.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      let mx = Math.max(RADIUS, Math.min(400 - RADIUS, e.clientX - rect.left));
+      let my = Math.max(RADIUS, Math.min(400 - RADIUS, e.clientY - rect.top));
+      guess.x = Math.max(-20, Math.min(20, canvasToCoord(mx)));
+      guess.y = Math.max(-20, Math.min(20, canvasToCoordY(my)));
+      updateGuessCoords();
+      draw();
+    });
+    canvas.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('mouseleave', () => dragging = false);
+
+    checkBtn.addEventListener('click', () => {
+      const dist = Math.hypot(coordToCanvas(guess.x) - coordToCanvas(target.x), coordToCanvasY(guess.y) - coordToCanvasY(target.y));
+      if (dist < TOLERANCE) {
+        // Correct
+        canvas.style.boxShadow = '0 0 0 6px #2ecc40';
+        checkmarkDiv.classList.add('show-check');
+        setTimeout(() => {
+          canvas.style.boxShadow = '';
+          resetGame(streak + 1);
+        }, 900);
+      } else {
+        // Incorrect
+        canvas.style.boxShadow = '0 0 0 6px #ff4136';
+        draw('red');
+        setTimeout(() => {
+          canvas.style.boxShadow = '';
+          resetGame(0);
+        }, 700);
+      }
+    });
+
+    // Initial draw
+    resetGame(0);
+  </script>
+</body>
+</html>
