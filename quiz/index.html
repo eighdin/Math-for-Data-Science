@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz App - Slope of a Line</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 32px 24px 24px 24px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .question {
+      margin-bottom: 32px;
+    }
+    .question-title {
+      font-size: 1.1em;
+      margin-bottom: 12px;
+      color: #222;
+    }
+    .options label {
+      display: block;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover {
+      background: #1256a3;
+    }
+    .result {
+      margin-top: 24px;
+      padding: 16px;
+      background: #e3f2fd;
+      border-radius: 4px;
+      color: #1976d2;
+      font-size: 1.1em;
+    }
+    .solution {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f1f8e9;
+      border-left: 4px solid #43a047;
+      border-radius: 4px;
+      color: #33691e;
+    }
+    .solution-wrong {
+      background: #ffebee;
+      border-left: 4px solid #b71c1c;
+      color: #b71c1c;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto 16px auto;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quiz: Slope of a Line</h1>
+    <form id="quiz-form">
+      <div class="question" id="question-1">
+        <div class="question-title">
+          1. Look at the graph below. What is the slope of the line?
+        </div>
+        <canvas id="line-graph-1" width="320" height="200"></canvas>
+        <div class="options">
+          <label><input type="radio" name="q1" value="positive"> Positive</label>
+          <label><input type="radio" name="q1" value="negative"> Negative</label>
+          <label><input type="radio" name="q1" value="zero"> Zero</label>
+          <label><input type="radio" name="q1" value="undefined"> Undefined</label>
+        </div>
+      </div>
+      <div class="question" id="question-2">
+        <div class="question-title">
+          2. Look at the graph below. What is the slope of the line?
+        </div>
+        <canvas id="line-graph-2" width="320" height="200"></canvas>
+        <div class="options">
+          <label><input type="radio" name="q2" value="positive"> Positive</label>
+          <label><input type="radio" name="q2" value="negative"> Negative</label>
+          <label><input type="radio" name="q2" value="zero"> Zero</label>
+          <label><input type="radio" name="q2" value="undefined"> Undefined</label>
+        </div>
+      </div>
+      <div class="question" id="question-3">
+        <div class="question-title">
+          3. Look at the graph below. What is the slope of the line?
+        </div>
+        <canvas id="line-graph-3" width="320" height="200"></canvas>
+        <div class="options">
+          <label><input type="radio" name="q3" value="positive"> Positive</label>
+          <label><input type="radio" name="q3" value="negative"> Negative</label>
+          <label><input type="radio" name="q3" value="zero"> Zero</label>
+          <label><input type="radio" name="q3" value="undefined"> Undefined</label>
+        </div>
+      </div>
+      <!-- New Questions Start -->
+      <div class="question" id="question-4">
+        <div class="question-title">
+          4. What is the slope of the line that passes through the points (2, 3) and (6, 7)?
+        </div>
+        <div class="options">
+          <label><input type="radio" name="q4" value="1"> 1</label>
+          <label><input type="radio" name="q4" value="2"> 2</label>
+          <label><input type="radio" name="q4" value="0.5"> 0.5</label>
+          <label><input type="radio" name="q4" value="-1"> -1</label>
+        </div>
+      </div>
+      <div class="question" id="question-5">
+        <div class="question-title">
+          5. What is the slope of the line that passes through the points (1, 5) and (4, 5)?
+        </div>
+        <div class="options">
+          <label><input type="radio" name="q5" value="0"> 0</label>
+          <label><input type="radio" name="q5" value="1"> 1</label>
+          <label><input type="radio" name="q5" value="undefined"> Undefined</label>
+          <label><input type="radio" name="q5" value="-1"> -1</label>
+        </div>
+      </div>
+      <div class="question" id="question-6">
+        <div class="question-title">
+          6. What is the slope of the line that passes through the points (3, 2) and (3, 8)?
+        </div>
+        <div class="options">
+          <label><input type="radio" name="q6" value="0"> 0</label>
+          <label><input type="radio" name="q6" value="1"> 1</label>
+          <label><input type="radio" name="q6" value="undefined"> Undefined</label>
+          <label><input type="radio" name="q6" value="-1"> -1</label>
+        </div>
+      </div>
+      <div class="question" id="question-7">
+        <div class="question-title">
+          7. Is the point (4, 9) on the line y = 2x + 1?
+        </div>
+        <div class="options">
+          <label><input type="radio" name="q7" value="yes"> Yes</label>
+          <label><input type="radio" name="q7" value="no"> No</label>
+        </div>
+      </div>
+      <div class="question" id="question-8">
+        <div class="question-title">
+          8. Is the point (2, 5) on the line y = 3x - 1?
+        </div>
+        <div class="options">
+          <label><input type="radio" name="q8" value="yes"> Yes</label>
+          <label><input type="radio" name="q8" value="no"> No</label>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn">Submit Quiz</button>
+    </form>
+    <div id="result"></div>
+  </div>
+  <script>
+    // Draw a line with positive slope on the first canvas
+    function drawLineGraph1() {
+      const canvas = document.getElementById('line-graph-1');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw axes
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 180); // y-axis
+      ctx.lineTo(40, 20);
+      ctx.moveTo(20, 160); // x-axis
+      ctx.lineTo(300, 160);
+      ctx.stroke();
+      // Draw the line (positive slope)
+      ctx.strokeStyle = '#1976d2';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(60, 150);
+      ctx.lineTo(260, 60);
+      ctx.stroke();
+      // Draw points
+      ctx.fillStyle = '#1976d2';
+      ctx.beginPath();
+      ctx.arc(60, 150, 5, 0, 2 * Math.PI);
+      ctx.arc(260, 60, 5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    // Draw a vertical line (undefined slope) on the second canvas
+    function drawLineGraph2() {
+      const canvas = document.getElementById('line-graph-2');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw axes
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 180); // y-axis
+      ctx.lineTo(40, 20);
+      ctx.moveTo(20, 160); // x-axis
+      ctx.lineTo(300, 160);
+      ctx.stroke();
+      // Draw the vertical line (undefined slope)
+      ctx.strokeStyle = '#d32f2f';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(160, 40);
+      ctx.lineTo(160, 160);
+      ctx.stroke();
+      // Draw points
+      ctx.fillStyle = '#d32f2f';
+      ctx.beginPath();
+      ctx.arc(160, 40, 5, 0, 2 * Math.PI);
+      ctx.arc(160, 160, 5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    drawLineGraph1();
+    drawLineGraph2();
+    // Draw a horizontal line (zero slope) on the third canvas
+    function drawLineGraph3() {
+      const canvas = document.getElementById('line-graph-3');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw axes
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 180); // y-axis
+      ctx.lineTo(40, 20);
+      ctx.moveTo(20, 160); // x-axis
+      ctx.lineTo(300, 160);
+      ctx.stroke();
+      // Draw the horizontal line (zero slope)
+      ctx.strokeStyle = '#388e3c';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(60, 100);
+      ctx.lineTo(260, 100);
+      ctx.stroke();
+      // Draw points
+      ctx.fillStyle = '#388e3c';
+      ctx.beginPath();
+      ctx.arc(60, 100, 5, 0, 2 * Math.PI);
+      ctx.arc(260, 100, 5, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    drawLineGraph3();
+
+    // Quiz logic
+    const quizForm = document.getElementById('quiz-form');
+    const resultDiv = document.getElementById('result');
+    const solutions = [
+      {
+        correct: 'positive',
+        explanation: 'The line rises as it moves from left to right, so the slope is <b>positive</b>.'
+      },
+      {
+        correct: 'undefined',
+        explanation: 'The line is vertical, so the slope is <b>undefined</b>.'
+      },
+      {
+        correct: 'zero',
+        explanation: 'The line is horizontal, so the slope is <b>zero</b>.'
+      },
+      {
+        correct: '1',
+        explanation: 'Slope = (7-3)/(6-2) = 4/4 = <b>1</b>.'
+      },
+      {
+        correct: '0',
+        explanation: 'Slope = (5-5)/(4-1) = 0/3 = <b>0</b>.'
+      },
+      {
+        correct: 'undefined',
+        explanation: 'Slope = (8-2)/(3-3) = 6/0, which is <b>undefined</b>.'
+      },
+      {
+        correct: 'yes',
+        explanation: 'Plug x=4 into y=2x+1: y=2*4+1=9, so (4,9) <b>is</b> on the line.'
+      },
+      {
+        correct: 'yes',
+        explanation: 'Plug x=2 into y=3x-1: y=3*2-1=5, so (2,5) <b>is</b> on the line.'
+      }
+    ];
+
+    quizForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      let score = 0;
+      let output = '';
+      let userAnswers = [];
+      // Question 1
+      const q1 = quizForm.elements['q1'].value;
+      userAnswers.push(q1);
+      if (q1 === solutions[0].correct) {
+        score++;
+      }
+      // Question 2
+      const q2 = quizForm.elements['q2'].value;
+      userAnswers.push(q2);
+      if (q2 === solutions[1].correct) {
+        score++;
+      }
+      // Question 3
+      const q3 = quizForm.elements['q3'].value;
+      userAnswers.push(q3);
+      if (q3 === solutions[2].correct) {
+        score++;
+      }
+      // Question 4
+      const q4 = quizForm.elements['q4'].value;
+      userAnswers.push(q4);
+      if (q4 === solutions[3].correct) {
+        score++;
+      }
+      // Question 5
+      const q5 = quizForm.elements['q5'].value;
+      userAnswers.push(q5);
+      if (q5 === solutions[4].correct) {
+        score++;
+      }
+      // Question 6
+      const q6 = quizForm.elements['q6'].value;
+      userAnswers.push(q6);
+      if (q6 === solutions[5].correct) {
+        score++;
+      }
+      // Question 7
+      const q7 = quizForm.elements['q7'].value;
+      userAnswers.push(q7);
+      if (q7 === solutions[6].correct) {
+        score++;
+      }
+      // Question 8
+      const q8 = quizForm.elements['q8'].value;
+      userAnswers.push(q8);
+      if (q8 === solutions[7].correct) {
+        score++;
+      }
+      output += `<div class='result'>You scored ${score} out of 8.</div>`;
+      // Show solutions, highlight wrong answers
+      for (let i = 0; i < solutions.length; i++) {
+        const isCorrect = userAnswers[i] === solutions[i].correct;
+        const style = isCorrect ? 'solution' : 'solution solution-wrong';
+        output += `<div class='${style}'><b>Question ${i+1} Solution:</b><br>${solutions[i].explanation}`;
+        if (!isCorrect) {
+          output += `<br><span style='color:#b71c1c'><b>Your answer:</b> ${userAnswers[i] ? userAnswers[i] : "(no answer)"}</span>`;
+        }
+        output += `</div>`;
+      }
+      resultDiv.innerHTML = output;
+      // Optionally, disable form after submit
+      const inputs = quizForm.querySelectorAll('input');
+      inputs.forEach(input => input.disabled = true);
+      quizForm.querySelector('.submit-btn').disabled = true;
+    });
+  </script>
+</body>
+</html>
