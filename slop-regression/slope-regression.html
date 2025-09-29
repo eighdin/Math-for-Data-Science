@@ -52,6 +52,7 @@
                 grad /= points.length;
                 b -= learningRate * grad;
                 bValues.push(b);
+                console.log(`Epoch ${epoch+1}: grad=${grad}, b=${b}`);
             }
             return bValues;
         }
@@ -67,13 +68,15 @@
                 grad /= points.length;
                 b -= learningRate * grad;
                 bValues.push(b);
+                console.log(`Epoch ${epoch+1}: grad=${grad}, b=${b}`);
             }
             return bValues;
         }
 
         document.getElementById('run').onclick = function() {
             const model = document.getElementById('model').value;
-            const learningRate = parseFloat(document.getElementById('learningRate').value);
+            let learningRate = parseFloat(document.getElementById('learningRate').value);
+            if (learningRate < 1e-10) learningRate = 1e-3;
             const epochs = parseInt(document.getElementById('epochs').value);
             const pointsStr = document.getElementById('points').value;
             let points;
