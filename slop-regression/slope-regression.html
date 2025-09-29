@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Regression Webapp</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        label, select, input, textarea, button { display: block; margin: 1em 0; }
+        textarea { width: 100%; height: 60px; }
+        #output { margin-top: 2em; }
+        .result { background: #f0f0f0; padding: 1em; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Slope Regression Webapp</h1>
+    <label for="model">Select Model:</label>
+    <select id="model">
+        <option value="y=bx">y = b * x</option>
+        <option value="y=b">y = b</option>
+    </select>
+
+    <label for="learningRate">Learning Rate:</label>
+    <input type="number" id="learningRate" step="any" value="0.01">
+
+    <label for="epochs">Number of Epochs:</label>
+    <input type="number" id="epochs" value="10">
+
+    <label for="points">Points (comma-separated, e.g. 1,2 2,3 3,4):</label>
+    <textarea id="points" placeholder="x1,y1 x2,y2 ..."></textarea>
+
+    <button id="run">Generate b values</button>
+
+    <div id="output"></div>
+
+    <script>
+        function parsePoints(str) {
+            return str.trim().split(/\s+/).map(pair => {
+                const [x, y] = pair.split(',').map(Number);
+                return { x, y };
+            });
+        }
+
+        function linearRegressionYEqualsBX(points, learningRate, epochs) {
+            let b = 0;
+            const bValues = [];
+            for (let epoch = 0; epoch < epochs; epoch++) {
+                let grad = 0;
+                for (const {x, y} of points) {
+                    grad += -2 * x * (y - b * x);
+                }
+                grad /= points.length;
+                b -= learningRate * grad;
+                bValues.push(b);
+            }
+            return bValues;
+        }
+
+        function linearRegressionYEqualsB(points, learningRate, epochs) {
+            let b = 0;
+            const bValues = [];
+            for (let epoch = 0; epoch < epochs; epoch++) {
+                let grad = 0;
+                for (const {y} of points) {
+                    grad += -2 * (y - b);
+                }
+                grad /= points.length;
+                b -= learningRate * grad;
+                bValues.push(b);
+            }
+            return bValues;
+        }
+
+        document.getElementById('run').onclick = function() {
+            const model = document.getElementById('model').value;
+            const learningRate = parseFloat(document.getElementById('learningRate').value);
+            const epochs = parseInt(document.getElementById('epochs').value);
+            const pointsStr = document.getElementById('points').value;
+            let points;
+            try {
+                points = parsePoints(pointsStr);
+                if (points.some(p => isNaN(p.x) || isNaN(p.y))) throw new Error();
+            } catch {
+                document.getElementById('output').innerHTML = '<span style="color:red">Invalid points format.</span>';
+                return;
+            }
+            let bValues;
+            if (model === 'y=bx') {
+                bValues = linearRegressionYEqualsBX(points, learningRate, epochs);
+            } else {
+                bValues = linearRegressionYEqualsB(points, learningRate, epochs);
+            }
+            document.getElementById('output').innerHTML =
+                '<div class="result"><b>b values:</b><br>' + bValues.map((b, i) => `Epoch ${i+1}: ${b.toFixed(6)}`).join('<br>') + '</div>';
+        };
+    </script>
+</body>
+</html>
