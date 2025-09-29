@@ -91,7 +91,7 @@
                 bValues = linearRegressionYEqualsB(points, learningRate, epochs);
             }
             document.getElementById('output').innerHTML =
-                '<div class="result"><b>b values:</b><br>' + bValues.map((b, i) => `Epoch ${i+1}: ${b.toFixed(6)}`).join('<br>') + '</div>';
+                '<div class="result"><b>b values:</b><br><textarea style="width:100%;height:200px;">' + bValues.map(b => b.toFixed(6)).join('\n') + '</textarea></div>';
         };
     </script>
 </body>
