@@ -26,8 +26,8 @@
     <label for="epochs">Number of Epochs:</label>
     <input type="number" id="epochs" value="10">
 
-    <label for="points">Points (comma-separated, e.g. 1,2 2,3 3,4):</label>
-    <textarea id="points" placeholder="x1,y1 x2,y2 ..."></textarea>
+    <label for="points">Points (one per line, format: x,y):</label>
+    <textarea id="points" placeholder="x,y\n..."></textarea>
 
     <button id="run">Generate b values</button>
 
@@ -35,8 +35,8 @@
 
     <script>
         function parsePoints(str) {
-            return str.trim().split(/\s+/).map(pair => {
-                const [x, y] = pair.split(',').map(Number);
+            return str.trim().split(/\n+/).map(line => {
+                const [x, y] = line.split(',').map(Number);
                 return { x, y };
             });
         }
