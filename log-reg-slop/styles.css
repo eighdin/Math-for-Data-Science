@@ -1,0 +1,14 @@
+:root{--bg:#f7f9fc;--panel:#fff;--accent:#246;--muted:#666}
+*{box-sizing:border-box;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+body{background:var(--bg);color:#111;padding:24px}
+main{max-width:900px;margin:0 auto}
+h1{color:var(--accent)}
+.panel{background:var(--panel);padding:14px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-top:12px}
+textarea{width:100%;font-family:monospace;font-size:13px;padding:8px;border:1px solid #ddd;border-radius:6px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.controls label{display:flex;gap:6px;align-items:center}
+input[type=number]{width:110px;padding:6px;border-radius:6px;border:1px solid #ccc}
+button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+button[disabled]{opacity:.5;cursor:not-allowed}
+pre#log{white-space:pre-wrap;max-height:200px;overflow:auto}
+.example-note{margin-top:6px;color:var(--muted);font-size:13px}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Logistic Regression Trainer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <h1>Logistic Regression (plain JS)</h1>
+
+    <section class="panel">
+      <label for="csvInput">Dataset (CSV). Each row = features...,label (label is 0 or 1). Example below:</label>
+      <textarea id="csvInput" rows="10" placeholder="x1,x2,...,label"></textarea>
+      <div class="example-note">Example dataset included by default for quick test.</div>
+    </section>
+
+    <section class="controls panel">
+      <label>Learning rate: <input id="learningRate" type="number" step="any" value="0.1"></label>
+      <label>Iterations: <input id="iterations" type="number" value="200"></label>
+      <label>Initialize weights to: 
+        <select id="initSelect">
+          <option value="0">0</option>
+          <option value="random">Random [-0.5,0.5]</option>
+        </select>
+      </label>
+      <button id="trainBtn">Train</button>
+      <button id="downloadBtn" disabled>Download weight history CSV</button>
+    </section>
+
+    <section class="panel">
+      <h2>Weight updates (CSV)</h2>
+      <textarea id="outCsv" rows="10" readonly placeholder="Iteration,Loss,w0,w1,..."></textarea>
+    </section>
+
+    <section class="panel">
+      <h2>Log / Status</h2>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
