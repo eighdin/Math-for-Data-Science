@@ -3,13 +3,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const ctx = canvas.getContext('2d');
   const rect = () => canvas.getBoundingClientRect();
 
+  const sigmoidCanvas = document.getElementById('sigmoid-canvas');
+  const sigmoidCtx = sigmoidCanvas.getContext('2d');
+
   const btnRandom = document.getElementById('btn-random');
   const btnClear = document.getElementById('btn-clear');
   const btnTrain = document.getElementById('btn-train');
   const btnStop = document.getElementById('btn-stop');
-  const lrInput = document.getElementById('lr');
   const epochsInput = document.getElementById('epochs');
-  const autoLrInput = document.getElementById('auto-lr');
+  // fixed base learning rate (auto-decay always enabled)
+  const baseLr = 0.05;
   const accuracyEl = document.getElementById('accuracy');
   const epochEl = document.getElementById('epoch');
   const currentLrEl = document.getElementById('current-lr');
@@ -35,6 +38,78 @@ document.addEventListener('DOMContentLoaded', ()=>{
     return sigmoid(sum);
   }
 
+  function drawSigmoidViz(){
+    sigmoidCtx.clearRect(0, 0, sigmoidCanvas.width, sigmoidCanvas.height);
+    const padding = 40;
+    const w = sigmoidCanvas.width - 2*padding;
+    const topY = padding + 12;
+    const bottomY = sigmoidCanvas.height - padding - 12;
+
+    // vertical decision line where z = 0 => nx = -b/wx
+    const b = weights[0], wx = weights[1];
+    let nx0 = 1e9;
+    if(Math.abs(wx) > 1e-8) nx0 = -b / wx;
+    const px0 = padding + (Math.max(-1, Math.min(1, nx0)) + 1)/2 * w;
+
+    // shade left and right of decision line based on predicted class
+    sigmoidCtx.fillStyle = 'rgba(239,68,68,0.08)';
+    sigmoidCtx.fillRect(padding, 0, px0 - padding, sigmoidCanvas.height);
+    sigmoidCtx.fillStyle = 'rgba(22,163,74,0.08)';
+    sigmoidCtx.fillRect(px0, 0, sigmoidCanvas.width - padding - px0, sigmoidCanvas.height);
+
+    // background regions: top = positive (green), bottom = negative (red)
+    sigmoidCtx.fillStyle = 'rgba(22,163,74,0.06)';
+    sigmoidCtx.fillRect(padding, 0, w, topY + 8);
+    sigmoidCtx.fillStyle = 'rgba(239,68,68,0.06)';
+    sigmoidCtx.fillRect(padding, bottomY - 8, w, sigmoidCanvas.height - (bottomY - 8));
+
+    // draw sigmoid curve as a function of normalized x (nx) using b + w_x * nx
+    sigmoidCtx.strokeStyle = 'rgba(255,255,255,0.95)';
+    sigmoidCtx.lineWidth = 2;
+    const samples = 200;
+    sigmoidCtx.beginPath();
+    for(let i=0;i<=samples;i++){
+      const nx = -1 + (2*i)/samples; // domain of normalized x
+      const z = b + wx * nx; // ignore wy*ny here so curve shows how x-axis aligns
+      const prob = sigmoid(z);
+      const px = padding + (nx + 1)/2 * w;
+      const py = topY + (1 - prob) * (bottomY - topY);
+      if(i===0) sigmoidCtx.moveTo(px, py); else sigmoidCtx.lineTo(px, py);
+    }
+    sigmoidCtx.stroke();
+
+    // vertical decision line where z = 0
+    sigmoidCtx.strokeStyle = 'rgba(255,200,100,0.95)';
+    sigmoidCtx.lineWidth = 2;
+    sigmoidCtx.beginPath();
+    sigmoidCtx.moveTo(px0, topY - 6);
+    sigmoidCtx.lineTo(px0, bottomY + 6);
+    sigmoidCtx.stroke();
+    sigmoidCtx.lineWidth = 1;
+
+    // draw points at fixed horizontal positions based on their normalized x (nx)
+    for(const p of points){
+      const nx = normalizeX(p.x);
+      const px = padding + (nx + 1)/2 * w;
+      const py = p.label > 0 ? topY : bottomY;
+      sigmoidCtx.beginPath();
+      sigmoidCtx.fillStyle = p.label > 0 ? 'rgba(22,163,74,0.95)' : 'rgba(239,68,68,0.95)';
+      sigmoidCtx.arc(px, py, 5, 0, Math.PI*2);
+      sigmoidCtx.fill();
+      sigmoidCtx.strokeStyle = 'rgba(0,0,0,0.25)';
+      sigmoidCtx.stroke();
+    }
+
+    // labels
+    sigmoidCtx.fillStyle = 'rgba(255,255,255,0.8)';
+    sigmoidCtx.font = '12px sans-serif';
+    sigmoidCtx.textAlign = 'center';
+    sigmoidCtx.fillText('Logit (z = b + w₁x + w₂y)', sigmoidCanvas.width/2, sigmoidCanvas.height - 10);
+    sigmoidCtx.textAlign = 'left';
+    sigmoidCtx.fillText('Positive (y=1)', padding, topY - 18);
+    sigmoidCtx.fillText('Negative (y=0)', padding, bottomY + 22);
+  }
+
   function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     // grid
@@ -43,7 +118,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     for(let y=0;y<canvas.height;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
 
     // probability-based shading (draw before points)
-    if(showBoundary.checked){
+    {
       const step = 8;
       for(let sx = 0; sx < canvas.width; sx += step){
         for(let sy = 0; sy < canvas.height; sy += step){
@@ -93,7 +168,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function updateAccuracy(){
-    if(points.length === 0){ accuracyEl.textContent = 'Accuracy: —'; epochEl.textContent = 'Epoch: 0'; currentLrEl.textContent = `LR: ${parseFloat(lrInput.value).toFixed(4)}`; return; }
+    if(points.length === 0){ accuracyEl.textContent = 'Accuracy: —'; epochEl.textContent = 'Epoch: 0'; currentLrEl.textContent = `LR: ${baseLr.toFixed(4)}`; return; }
     let ok=0;
     for(const p of points){
       const nx = normalizeX(p.x), ny = normalizeY(p.y);
@@ -109,9 +184,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     btnTrain.disabled = disabled;
     btnRandom.disabled = disabled;
     btnClear.disabled = disabled;
-    lrInput.disabled = disabled;
     epochsInput.disabled = disabled;
-    autoLrInput.disabled = disabled;
   }
 
   function trainLogisticAnimated(initialLr=0.05, epochs=20, delay=200){
@@ -122,8 +195,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     btnStop.disabled = false;
 
     trainingInterval = setInterval(()=>{
-      // current learning rate schedule
-      const lr = autoLrInput.checked ? initialLr / (1 + currentEpoch * 0.05) : initialLr;
+      // current learning rate schedule (auto-decay always enabled)
+      const lr = initialLr / (1 + currentEpoch * 0.05);
       currentLrEl.textContent = `LR: ${lr.toFixed(4)}`;
 
       // one epoch of SGD (sequential)
@@ -141,6 +214,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       updateAccuracy();
       epochEl.textContent = `Epoch: ${currentEpoch}/${epochs}`;
       draw();
+      drawSigmoidViz();
       if(currentEpoch >= epochs){
         clearInterval(trainingInterval);
         trainingInterval = null;
@@ -174,6 +248,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     points.push({x,y,label});
     updateAccuracy();
     draw();
+    drawSigmoidViz();
   });
 
   btnRandom.addEventListener('click', ()=>{
@@ -197,6 +272,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
     updateAccuracy();
     draw();
+    drawSigmoidViz();
   });
 
   btnClear.addEventListener('click', ()=>{
@@ -204,15 +280,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
     weights = [Math.random()*0.2-0.1, Math.random()*0.2-0.1, Math.random()*0.2-0.1];
     updateAccuracy();
     draw();
+    drawSigmoidViz();
   });
 
   btnTrain.addEventListener('click', ()=>{
-    const lr = parseFloat(lrInput.value) || 0.05;
     const epochs = parseInt(epochsInput.value) || 20;
-    trainLogisticAnimated(lr, epochs, 160);
+    trainLogisticAnimated(baseLr, epochs, 160);
   });
 
   // initial draw
   updateAccuracy();
   draw();
+  drawSigmoidViz();
 });
