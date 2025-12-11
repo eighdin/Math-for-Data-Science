@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Perceptron Classification Demo</title>
+  <link rel="stylesheet" href="classification.css">
+</head>
+<body>
+  <main>
+    <h1>Perceptron Classification Demo</h1>
+    <section class="controls">
+      <div class="row">
+        <button id="btn-random">Add Random Points</button>
+        <button id="btn-clear">Clear Points</button>
+      </div>
+      <div class="row">
+        <label>Learning rate: <input id="lr" type="number" step="0.0001" value="0.05" min="0.0001"></label>
+        <label>Epochs: <input id="epochs" type="number" value="40"></label>
+        <label style="margin-left:8px"><input id="auto-lr" type="checkbox" checked> Auto LR</label>
+        <button id="btn-train">Train (logistic)</button>
+      </div>
+      <div class="row">
+        <label><input id="show-boundary" type="checkbox" checked> Show decision boundary</label>
+        <span id="accuracy">Accuracy: —</span>
+        <span id="epoch" style="margin-left:12px">Epoch: 0</span>
+        <span id="current-lr" style="margin-left:12px">LR: 0.05</span>
+        <button id="btn-stop" style="margin-left:8px;background:#ef4444;color:#fff;border:none;padding:6px 8px;border-radius:6px;" disabled>Stop</button>
+      </div>
+      <p class="hint">Click on canvas to add labeled points. Hold <strong>Shift</strong> while clicking to add negative class (-1).</p>
+    </section>
+
+    <section class="legend" style="margin-bottom:12px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="width:18px;height:12px;background:rgba(22,163,74,0.12);border-radius:3px;border:1px solid rgba(22,163,74,0.16)"></div>
+        <div>Model predicts <strong>positive</strong> (green)</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="width:18px;height:12px;background:rgba(239,68,68,0.09);border-radius:3px;border:1px solid rgba(239,68,68,0.12)"></div>
+        <div>Model predicts <strong>negative</strong> (red)</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="width:12px;height:12px;border-radius:50%;background:#16a34a;border:1px solid rgba(0,0,0,0.2)"></div>
+        <div>Data point: <strong>+1</strong></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="width:12px;height:12px;border-radius:50%;background:#ef4444;border:1px solid rgba(0,0,0,0.2)"></div>
+        <div>Data point: <strong>-1</strong></div>
+      </div>
+    </section>
+
+    <section class="canvas-wrap">
+      <canvas id="canvas" width="600" height="400"></canvas>
+    </section>
+    <footer>
+      <small>Interactive demo: perceptron learns a linear separator. Points in green = +1, red = -1.</small>
+    </footer>
+  </main>
+  <script src="classification.js"></script>
+</body>
+</html>
